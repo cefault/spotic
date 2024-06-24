@@ -81,7 +81,7 @@ void audio_editor(short audio_index) {
         cout << "\tАвтор: " << AudioCollection[audio_index - 1].audio_author << endl;
         cout << "\tРік: " << AudioCollection[audio_index - 1].audio_year << endl;
         cout << "\tТекст: ...\n"; 
-        cout << "\tПосилання: " << AudioCollection[audio_index - 1].audio_name << endl << endl;
+        cout << "\tПосилання: " << AudioCollection[audio_index - 1].audio_link << endl << endl;
         cout << "   Яку опцію потрібно відредагувати?\n";
         cout << "       [1] Назва\n"
                 "       [2] Автор\n"
@@ -160,6 +160,57 @@ void audio_log(short audio_index) {
     string _dump; cin.ignore(); getline(cin, _dump);
 }
 
+void audio_copy_text(short audio_index) {
+    if (!index_reach(audio_index)) return;
+    CLEAR;
+    GREEN; cout << "Збереження тексту до файлу [" << audio_index << "]\n\n"; RESET;
+    string WriteFileName;
+    cout << "   Введіть назву файла для запису: ";
+    cin.ignore();
+    getline(cin, WriteFileName);
+
+    ofstream Write(WriteFileName+".txt");
+    Write << AudioCollection[audio_index - 1].audio_lyrics;
+    cout << "\nЗапис пройшов успішно!";
+    Sleep(3000);
+}
+
+void audio_search_author(string Author) {
+    CLEAR;
+    GREEN; cout << "Відображення записів одного автора [" << Author << "]\n\n"; RESET;
+    short _COUNTER = 0;
+    for (Audio _Current_Audio : AudioCollection) {
+        if (_Current_Audio.audio_author.find(Author) != string::npos) {
+            _COUNTER++;
+            cout << "       [" << _COUNTER << "] " <<
+                _Current_Audio.audio_name << " : " <<
+                _Current_Audio.audio_author << endl;
+        }
+    }
+    cout << "\nНатисніть \"Enter\" для того щоб повернутися в Меню\n";
+    string _dump; getline(cin, _dump);
+}
+
+void audio_search_string(string _String) {
+    CLEAR;
+    GREEN; cout << "Відображення записів за ключовими словами\n\n"; RESET;
+    short _COUNTER = 0;
+    for (Audio _Current_Audio : AudioCollection) {
+        string _full_lower_lyric = "";
+        string _full_lower_input = "";
+        for (char _chr : _Current_Audio.audio_lyrics) _full_lower_lyric += tolower(_chr);
+        for (char _chr : _String) _full_lower_input += tolower(_chr);
+        if (_full_lower_lyric.find(_full_lower_input) != string::npos) {
+            _COUNTER++;
+            cout << "       [" << _COUNTER << "] " <<
+                _Current_Audio.audio_name << " : " <<
+                _Current_Audio.audio_author << endl;
+        }
+    }
+    cout << "\nНатисніть \"Enter\" для того щоб повернутися в Меню\n";
+    string _dump; getline(cin, _dump);
+}
+
 int main()
 {   
     SetConsoleCP(1251);
@@ -184,7 +235,8 @@ int main()
     cout << "   |   [3] Видалення запису                                   |\n";
     cout << "   |   [4] Відображення інформації                            |\n";
     cout << "   |   [5] Збереження тексту до файлу                         |\n";
-    cout << "   |   [6] Відкрити аудіофайл                                 |\n";
+    cout << "   |   [6] Відображення записів одного автора                 |\n";
+    cout << "   |   [7] Відображення записів за ключовими словами          |\n";
     cout << "   |   [0] Вихід                                              |\n";
     cout << "   |––––––––––––––––––––––––––––––––––––––––––––––––––––––––––|\n";
 
@@ -205,12 +257,37 @@ int main()
         cin >> Instance_Index;
         audio_editor(Instance_Index);
     }
+    else if (User == 3) {
+        short Instance_Index;
+        cout << "\nВведіть індекс запису: ";
+        cin >> Instance_Index;
+        if (index_reach(Instance_Index)) AudioCollection.erase(AudioCollection.cbegin() + Instance_Index-1);
+    }
     else if (User == 4) {
         short Instance_Index;
         cout << "\nВведіть індекс запису: ";
         cin >> Instance_Index;
         audio_log(Instance_Index);
     }
-
+    else if (User == 5) {
+        short Instance_Index;
+        cout << "\nВведіть індекс запису: ";
+        cin >> Instance_Index;
+        audio_copy_text(Instance_Index);
+    }
+    else if (User == 6) {
+        string Instance_Author;
+        cout << "\nВведіть автора для пошуку: ";
+        cin.ignore();
+        getline(cin, Instance_Author);
+        audio_search_author(Instance_Author);
+    }
+    else if (User == 7) {
+        string Instance_String;
+        cout << "\nВведіть речення для пошуку: ";
+        cin.ignore();
+        getline(cin, Instance_String);
+        audio_search_string(Instance_String);
+    }
     main();                                             // Recall
 }
